@@ -21,17 +21,32 @@ class TableUpdateWidget extends StatefulWidget {
 }
 
 class _TableUpdateWidgetState extends State<TableUpdateWidget> {
-  // テーブル表示用の行リスト
   List<TableRow> weeklyRecordTableRowList = [];
   final tableDateFormatter = DateFormat('M/d');
 
-  /// 指定された期間の週次記録を生成
-  List<Map> weeklyRecordSummary(
+  @override
+  void initState() {
+    super.initState();
+    tableUpdate(DateTime.now());
+  }
+
+  List<Map> _generateWeeklyRecordSummary(
     List recordList,
     List subjectList,
     DateTime endDate,
   ) {
-    // 初期化（各日付を生成）
+    /*
+      endDateがDateTime(2024,11,28)で、それぞれのデータが`datas/initial_data.dart`の場合以下のようなリストを生成する。
+      [
+        {"id": 0, "date": "2024-11-22", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 1, "date": "2024-11-23", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 2, "date": "2024-11-24", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "1:00:00"},
+        {"id": 3, "date": "2024-11-25", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "1:15:00", "音楽": "0:00:00"},
+        {"id": 4, "date": "2024-11-26", "数学": "0:00:00", "英語": "0:00:00", "理科": "2:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 5, "date": "2024-11-27", "数学": "0:00:00", "英語": "0:45:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 6, "date": "2024-11-28", "数学": "1:30:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"}
+      ]
+     */
     final weeklyRecordList = List<Map>.generate(
       7,
       (index) => {
@@ -39,19 +54,41 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
         'date': endDate.subtract(Duration(days: 6 - index)),
       },
     );
+    /*
+      上記実行後
+      [
+        {"id": 0, "date": "2024-11-22"},
+        {"id": 1, "date": "2024-11-23"},
+        {"id": 2, "date": "2024-11-24"},
+        {"id": 3, "date": "2024-11-25"},
+        {"id": 4, "date": "2024-11-26"},
+        {"id": 5, "date": "2024-11-27"},
+        {"id": 6, "date": "2024-11-28"}
+      ]
+     */
 
-    // 科目の枠を追加
-    for (final subjectObj in subjectList) {
+    for (final subject in subjectList) {
       for (final record in weeklyRecordList) {
-        record[subjectObj.title] = Duration.zero;
+        record[subject.title] = Duration.zero;
       }
     }
+    /* 
+    上記実行後
+      [
+        {"id": 0, "date": "2024-11-22", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 1, "date": "2024-11-23", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 2, "date": "2024-11-24", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 3, "date": "2024-11-25", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 4, "date": "2024-11-26", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 5, "date": "2024-11-27", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"},
+        {"id": 6, "date": "2024-11-28", "数学": "0:00:00", "英語": "0:00:00", "理科": "0:00:00", "社会": "0:00:00", "音楽": "0:00:00"}
+      ]
+     */
 
-    // 各記録を合算
-    for (final recordObj in recordList) {
-      for (final record in weeklyRecordList) {
-        if (recordObj.date == record['date']) {
-          record[recordObj.subject.title] += recordObj.time;
+    for (final record in recordList) {
+      for (final weeklyRecord in weeklyRecordList) {
+        if (record.date == weeklyRecord['date']) {
+          weeklyRecord[record.subject.title] += record.time;
         }
       }
     }
@@ -59,10 +96,9 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
     return weeklyRecordList;
   }
 
-  /// 週次記録リストを元にテーブルの行を作成
-  List<TableRow> createSummaryTable(List weeklyRecordList, List subjectList) {
+  List<TableRow> _createSummaryTable(List weeklyRecordList, List subjectList) {
     final tableRowList = <TableRow>[
-      // ヘッダー行
+      // 日付の作成(一行目)
       TableRow(
         children: [
           const Text(''),
@@ -71,7 +107,6 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
               width: 200,
               child: Text(
                 tableDateFormatter.format(record['date']),
-                // maxLines: 1,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -80,18 +115,19 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
       ),
     ];
 
-    // 各科目のデータ行
-    for (final subjectObj in subjectList) {
+    for (final subject in subjectList) {
+      // 二行目以降
       tableRowList.add(
         TableRow(
           children: [
+            // Subject
             Text(
-              subjectObj.title,
+              subject.title,
               maxLines: 1,
             ),
             ...weeklyRecordList.map(
               (record) {
-                final duration = record[subjectObj.title] as Duration;
+                final duration = record[subject.title] as Duration;
                 return duration == Duration.zero
                     ? const Text('-')
                     : Text(
@@ -108,11 +144,10 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
     return tableRowList;
   }
 
-  /// テーブルを更新
   void tableUpdate(DateTime endDate) {
     setState(() {
-      weeklyRecordTableRowList = createSummaryTable(
-        weeklyRecordSummary(
+      weeklyRecordTableRowList = _createSummaryTable(
+        _generateWeeklyRecordSummary(
           widget.recordList,
           widget.subjectList,
           endDate,
@@ -127,17 +162,12 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // テーブル表示
         Padding(
           padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // 横方向スクロールを有効に
-
+            scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                // minWidth: MediaQuery.of(context).size.width,
-                minWidth: 80 * 8, // 幅を強制的に大きく指定
-              ),
+              constraints: const BoxConstraints(minWidth: 80 * 8),
               child: DefaultTextStyle.merge(
                 style: const TextStyle(fontSize: 22),
                 textAlign: TextAlign.center,
@@ -149,8 +179,6 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
             ),
           ),
         ),
-
-        // 日付選択
         Padding(
           padding: const EdgeInsets.all(16),
           child: DateTimeFormField(
