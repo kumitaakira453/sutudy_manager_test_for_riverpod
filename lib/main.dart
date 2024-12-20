@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
 import 'pages/record_register.dart';
 import 'pages/subject_register.dart';
 import 'pages/summary.dart';
-
-final Logger logger = Logger();
 
 void main() {
   runApp(
