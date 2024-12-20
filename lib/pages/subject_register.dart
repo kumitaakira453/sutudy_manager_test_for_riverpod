@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SubjectRegisterPage extends StatefulWidget {
+import '../models/subject.dart';
+import '../providers/subject.dart';
+
+class SubjectRegisterPage extends ConsumerStatefulWidget {
   const SubjectRegisterPage({super.key});
 
   @override
-  SubjectRegisterPageState createState() => SubjectRegisterPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _SubjectRegisterPageState();
 }
 
-class SubjectRegisterPageState extends State<SubjectRegisterPage> {
+class _SubjectRegisterPageState extends ConsumerState<SubjectRegisterPage> {
   final formKey = GlobalKey<FormState>();
   final titleFormKey = GlobalKey<FormFieldState<String>>();
 
   @override
   Widget build(BuildContext context) {
-    final addSubject = ModalRoute.of(context)!.settings.arguments! as Function;
+    void addSubject(String title) {
+      final id = ref.watch(subjectsNotifierProvider).length;
+      ref.watch(subjectsNotifierProvider).add(Subject(id: id, title: title));
+    }
 
     return Scaffold(
       appBar: AppBar(

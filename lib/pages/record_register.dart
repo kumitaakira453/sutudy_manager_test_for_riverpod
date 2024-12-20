@@ -1,36 +1,29 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/subject.dart';
+import '../models/record.dart';
+import '../providers/record.dart';
+import '../providers/subject.dart';
 
-class RecordRegisterArguments {
-  RecordRegisterArguments(this.addRecord, this.subjectList);
-  final void Function(Subject, String, DateTime, Duration) addRecord;
-  final List<Subject> subjectList;
-}
-
-class RecordRegisterPage extends StatefulWidget {
+class RecordRegisterPage extends ConsumerStatefulWidget {
   const RecordRegisterPage({
     super.key,
-    required this.addRecord,
-    required this.subjectList,
   });
 
-  final void Function(Subject, String, DateTime, Duration) addRecord;
-  final List<Subject> subjectList;
-
   @override
-  RecordRegisterPageState createState() => RecordRegisterPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _RecordRegisterPageState();
 }
 
-class RecordRegisterPageState extends State<RecordRegisterPage> {
+class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
   final formKey = GlobalKey<FormState>();
   final contentFormKey = GlobalKey<FormFieldState<String>>();
   final dateFormKey = GlobalKey<FormFieldState<DateTime>>();
-
   final hoursController = TextEditingController();
   final minutesController = TextEditingController();
 
+  Map<String, dynamic> formValue = {};
   int selectedValue = 0;
 
   @override
@@ -42,18 +35,27 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final addRecord = widget.addRecord;
-    final subjectList = widget.subjectList;
+    final subjectList = ref.watch(subjectsNotifierProvider);
 
-    // print(addRecord);
-    print(subjectList);
+    void addRecord(Map<String, dynamic> formValue) {
+      final id = ref.watch(recordsNotifierProvider).length;
+      ref.read(recordsNotifierProvider.notifier).add(
+            Record(
+              id: id,
+              subject: formValue['subject'],
+              content: formValue['content'],
+              date: formValue['date'],
+              time: formValue['time'],
+            ),
+          );
+    }
 
     final dropdownMenuItemList = <DropdownMenuItem<int>>[];
-    for (final subjectObj in subjectList) {
+    for (final subject in subjectList) {
       dropdownMenuItemList.add(
         DropdownMenuItem(
-          value: subjectObj.id,
-          child: Text(subjectObj.title),
+          value: subject.id,
+          child: Text(subject.title),
         ),
       );
     }
@@ -156,15 +158,11 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
           if (formKey.currentState!.validate()) {
             final hours = int.tryParse(hoursController.text) ?? 0;
             final minutes = int.tryParse(minutesController.text) ?? 0;
-            final date = dateFormKey.currentState?.value ?? DateTime(0);
-            final updatedDateTime = DateTime(date.year, date.month, date.day);
-
-            addRecord(
-              subjectList[selectedValue],
-              contentFormKey.currentState?.value ?? '',
-              updatedDateTime,
-              Duration(hours: hours, minutes: minutes),
-            );
+            formValue['subject'] = subjectList[selectedValue];
+            formValue['content'] = contentFormKey.currentState?.value ?? '';
+            formValue['date'] = dateFormKey.currentState?.value ?? '';
+            formValue['time'] = Duration(hours: hours, minutes: minutes);
+            addRecord(formValue);
             Navigator.of(context).pop();
           }
         },

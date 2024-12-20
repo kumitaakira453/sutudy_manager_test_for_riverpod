@@ -7,7 +7,11 @@ class RecordsNotifier extends StateNotifier<List<Record>> {
   RecordsNotifier() : super(initialState);
   static List<Record> initialState = initialRecords;
   void add(Record record) {
+    print('hello');
     state = [...state, record];
+    for (final record in state) {
+      print(record.content);
+    }
   }
 
   void remove(int id) {

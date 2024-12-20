@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
 import 'pages/record_register.dart';
@@ -8,7 +9,11 @@ import 'pages/summary.dart';
 final Logger logger = Logger();
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,32 +25,12 @@ class MyApp extends StatelessWidget {
       title: 'Study Manager',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
       ),
       initialRoute: '/',
       routes: {
         '/': (context) => const SummaryPage(),
         '/subject_register': (context) => const SubjectRegisterPage(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/record_register') {
-          final args = settings.arguments as RecordRegisterArguments;
-          return MaterialPageRoute(
-            builder: (context) {
-              return RecordRegisterPage(
-                addRecord: args.addRecord,
-                subjectList: args.subjectList,
-              );
-            },
-            // settings: settings,
-          );
-        } else {
-          return MaterialPageRoute(
-            builder: (context) {
-              return const SummaryPage();
-            },
-          );
-        }
+        '/record_register': (context) => const RecordRegisterPage(),
       },
     );
   }

@@ -1,11 +1,10 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../main.dart';
-import '../models/record.dart';
-import '../models/subject.dart';
-import 'record_register.dart';
+import '../providers/record.dart';
+import '../providers/subject.dart';
 
 class TableUpdateWidget extends StatefulWidget {
   const TableUpdateWidget({
@@ -150,75 +149,32 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
   }
 }
 
-class SummaryPage extends StatefulWidget {
+class SummaryPage extends ConsumerStatefulWidget {
   const SummaryPage({super.key});
 
   @override
-  SummaryPageState createState() => SummaryPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SummaryPageState();
 }
 
-class SummaryPageState extends State {
-  final List<Subject> subjectList = [];
-  final List<Record> recordList = [];
-
+class _SummaryPageState extends ConsumerState<SummaryPage> {
   final listDateFormatter = DateFormat('yyyy/M/d');
-
-  void addSubject(String title) {
-    setState(
-      () {
-        subjectList.add(
-          Subject(
-            id: subjectList.length,
-            title: title,
-          ),
-        );
-      },
-    );
-  }
-
-  void addRecord(
-    Subject subject,
-    String content,
-    DateTime date,
-    Duration time,
-  ) {
-    setState(
-      () {
-        recordList.add(
-          Record(
-            id: recordList.length,
-            subject: subject,
-            content: content,
-            date: date,
-            time: time,
-          ),
-        );
-      },
-    );
-  }
 
   void toSubjectRegiterPage() {
     Navigator.of(context).pushNamed(
       '/subject_register',
-      arguments: addSubject,
     );
   }
 
   void toRecordRegiterPage() {
     Navigator.of(context).pushNamed(
       '/record_register',
-      arguments: RecordRegisterArguments(
-        addRecord,
-        subjectList,
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    logger
-      ..d(subjectList)
-      ..d(recordList);
+    final subjectList = ref.watch(subjectsNotifierProvider);
+    final recordList = ref.watch(recordsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -232,7 +188,7 @@ class SummaryPageState extends State {
             subjectList: subjectList,
           ),
           SizedBox(
-            height: 200,
+            height: 400,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: ListView.builder(
@@ -261,8 +217,8 @@ class SummaryPageState extends State {
             onPressed: toSubjectRegiterPage,
             child: const Icon(Icons.menu_book),
           ),
-          const Padding(
-            padding: EdgeInsets.all(8),
+          const SizedBox(
+            height: 8,
           ),
           FloatingActionButton(
             heroTag: '学習記録',
