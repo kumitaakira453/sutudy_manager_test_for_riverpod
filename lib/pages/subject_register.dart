@@ -20,9 +20,21 @@ class _SubjectRegisterPageState extends ConsumerState<SubjectRegisterPage> {
   Widget build(BuildContext context) {
     void addSubject(String title) {
       final id = ref.watch(subjectsNotifierProvider).length;
-      ref.watch(subjectsNotifierProvider).add(Subject(id: id, title: title));
+      ref
+          .read(subjectsNotifierProvider.notifier)
+          .add(Subject(id: id, title: title));
     }
 
+    void removeSubject(int id) {
+      ref.read(subjectsNotifierProvider.notifier).remove(id);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('ID:$idのSubjectを削除しました'),
+        ),
+      );
+    }
+
+    final subjects = ref.watch(subjectsNotifierProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('SubjectRegisterPage'),
@@ -50,6 +62,26 @@ class _SubjectRegisterPageState extends ConsumerState<SubjectRegisterPage> {
                 },
               ),
             ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: subjects.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      title: Text(
+                        subjects[index].title,
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          removeSubject(subjects[index].id);
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -58,7 +90,8 @@ class _SubjectRegisterPageState extends ConsumerState<SubjectRegisterPage> {
         onPressed: () {
           if (formKey.currentState!.validate()) {
             addSubject(titleFormKey.currentState?.value ?? '');
-            Navigator.of(context).pop();
+            titleFormKey.currentState?.reset();
+            // Navigator.of(context).pop();
           }
         },
       ),

@@ -12,92 +12,95 @@ class TableUpdateWidget extends StatefulWidget {
     required this.recordList,
     required this.subjectList,
   });
+
   final List recordList;
   final List subjectList;
 
-  // createState() メソッドを呼び出し、この後定義する _FavoriteWidgetState のインスタンスを作成して返す
   @override
   State<TableUpdateWidget> createState() => _TableUpdateWidgetState();
 }
 
 class _TableUpdateWidgetState extends State<TableUpdateWidget> {
+  // テーブル表示用の行リスト
   List<TableRow> weeklyRecordTableRowList = [];
   final tableDateFormatter = DateFormat('M/d');
 
+  /// 指定された期間の週次記録を生成
   List<Map> weeklyRecordSummary(
     List recordList,
     List subjectList,
     DateTime endDate,
   ) {
-    final List<Map> weeklyRecordList = List.generate(
+    // 初期化（各日付を生成）
+    final weeklyRecordList = List<Map>.generate(
       7,
       (index) => {
         'id': index,
-        'date': DateTime.now(),
+        'date': endDate.subtract(Duration(days: 6 - index)),
       },
-    ).toList();
+    );
 
-    // subjectlistを回して、weeklyRecordListに科目の枠を追加
-    // ついでに日付も入れる
+    // 科目の枠を追加
     for (final subjectObj in subjectList) {
-      for (var i = 0; i < 7; i++) {
-        weeklyRecordList[i]['${subjectObj.title}'] = Duration.zero;
-        weeklyRecordList[i]['date'] = endDate.subtract(Duration(days: 6 - i));
+      for (final record in weeklyRecordList) {
+        record[subjectObj.title] = Duration.zero;
       }
     }
 
-    // recordListを回してweeklyRecordListに時間を合算
+    // 各記録を合算
     for (final recordObj in recordList) {
-      debugPrint(recordObj.content);
-
-      for (var i = 0; i < 7; i++) {
-        debugPrint(recordObj.date);
-        debugPrint(weeklyRecordList[i]['date']);
-        if (recordObj.date == weeklyRecordList[i]['date']) {
-          debugPrint(recordObj.content);
-          weeklyRecordList[i]['${recordObj.subject.title}'] += recordObj.time;
+      for (final record in weeklyRecordList) {
+        if (recordObj.date == record['date']) {
+          record[recordObj.subject.title] += recordObj.time;
         }
       }
     }
+
     return weeklyRecordList;
   }
 
+  /// 週次記録リストを元にテーブルの行を作成
   List<TableRow> createSummaryTable(List weeklyRecordList, List subjectList) {
     final tableRowList = <TableRow>[
+      // ヘッダー行
       TableRow(
         children: [
           const Text(''),
-          ...List.generate(
-            7,
-            (index) => Text(
-              tableDateFormatter.format(weeklyRecordList[index]['date']),
+          ...weeklyRecordList.map(
+            (record) => SizedBox(
+              width: 200,
+              child: Text(
+                tableDateFormatter.format(record['date']),
+                // maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ],
       ),
     ];
 
-    // まず科目で必要な行を作成
+    // 各科目のデータ行
     for (final subjectObj in subjectList) {
-      final contents = <Text>[
-        Text('${subjectObj.title}'),
-      ];
-      for (var i = 0; i < 7; i++) {
-        final Duration subjectDuration =
-            weeklyRecordList[i]['${subjectObj.title}'];
-        if (subjectDuration == Duration.zero) {
-          contents.add(const Text('-'));
-        } else {
-          contents.add(
-            Text(
-              '${subjectDuration.inHours}:${subjectDuration.inMinutes % 60}',
-            ),
-          );
-        }
-      }
       tableRowList.add(
         TableRow(
-          children: contents,
+          children: [
+            Text(
+              subjectObj.title,
+              maxLines: 1,
+            ),
+            ...weeklyRecordList.map(
+              (record) {
+                final duration = record[subjectObj.title] as Duration;
+                return duration == Duration.zero
+                    ? const Text('-')
+                    : Text(
+                        '${duration.inHours}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}',
+                        maxLines: 1,
+                      );
+              },
+            ),
+          ],
         ),
       );
     }
@@ -105,13 +108,14 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
     return tableRowList;
   }
 
+  /// テーブルを更新
   void tableUpdate(DateTime endDate) {
     setState(() {
       weeklyRecordTableRowList = createSummaryTable(
         weeklyRecordSummary(
           widget.recordList,
           widget.subjectList,
-          DateTime(endDate.year, endDate.month, endDate.day),
+          endDate,
         ),
         widget.subjectList,
       );
@@ -121,18 +125,32 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // テーブル表示
         Padding(
           padding: const EdgeInsets.all(16),
-          child: DefaultTextStyle.merge(
-            style: const TextStyle(fontSize: 22),
-            textAlign: TextAlign.center,
-            child: Table(
-              border: TableBorder.all(),
-              children: weeklyRecordTableRowList,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal, // 横方向スクロールを有効に
+
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                // minWidth: MediaQuery.of(context).size.width,
+                minWidth: 80 * 8, // 幅を強制的に大きく指定
+              ),
+              child: DefaultTextStyle.merge(
+                style: const TextStyle(fontSize: 22),
+                textAlign: TextAlign.center,
+                child: Table(
+                  border: TableBorder.all(),
+                  children: weeklyRecordTableRowList,
+                ),
+              ),
             ),
           ),
         ),
+
+        // 日付選択
         Padding(
           padding: const EdgeInsets.all(16),
           child: DateTimeFormField(
@@ -140,7 +158,9 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
             initialPickerDateTime: DateTime.now(),
             mode: DateTimeFieldPickerMode.date,
             onChanged: (value) {
-              tableUpdate(value!);
+              if (value != null) {
+                tableUpdate(value);
+              }
             },
           ),
         ),
@@ -171,6 +191,15 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
     );
   }
 
+  void removeRecord(int id) {
+    ref.read(recordsNotifierProvider.notifier).remove(id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('ID:$idのRecordを削除しました'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjectList = ref.watch(subjectsNotifierProvider);
@@ -187,8 +216,7 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
             recordList: recordList,
             subjectList: subjectList,
           ),
-          SizedBox(
-            height: 400,
+          Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: ListView.builder(
@@ -198,6 +226,12 @@ class _SummaryPageState extends ConsumerState<SummaryPage> {
                     child: ListTile(
                       title: Text(
                         '${index + 1}  ${recordList[index].subject.title} ${recordList[index].content} ${listDateFormatter.format(recordList[index].date)} ${recordList[index].time.inHours}時間${recordList[index].time.inMinutes % 60}分',
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          removeRecord(recordList[index].id);
+                        },
+                        icon: const Icon(Icons.delete),
                       ),
                     ),
                   );
