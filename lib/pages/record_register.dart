@@ -1,7 +1,7 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 
-import 'models/subject.dart';
+import '../models/subject.dart';
 
 class RecordRegisterArguments {
   RecordRegisterArguments(this.addRecord, this.subjectList);

@@ -2,8 +2,9 @@ import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'models/record.dart';
-import 'models/subject.dart';
+import '../main.dart';
+import '../models/record.dart';
+import '../models/subject.dart';
 import 'record_register.dart';
 
 class TableUpdateWidget extends StatefulWidget {
@@ -29,36 +30,13 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
     List subjectList,
     DateTime endDate,
   ) {
-    final weeklyRecordList = <Map>[
-      {
-        'id': 0,
+    final List<Map> weeklyRecordList = List.generate(
+      7,
+      (index) => {
+        'id': index,
         'date': DateTime.now(),
       },
-      {
-        'id': 1,
-        'date': DateTime.now(),
-      },
-      {
-        'id': 2,
-        'date': DateTime.now(),
-      },
-      {
-        'id': 3,
-        'date': DateTime.now(),
-      },
-      {
-        'id': 4,
-        'date': DateTime.now(),
-      },
-      {
-        'id': 5,
-        'date': DateTime.now(),
-      },
-      {
-        'id': 6,
-        'date': DateTime.now(),
-      },
-    ];
+    ).toList();
 
     // subjectlistを回して、weeklyRecordListに科目の枠を追加
     // ついでに日付も入れる
@@ -71,13 +49,13 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
 
     // recordListを回してweeklyRecordListに時間を合算
     for (final recordObj in recordList) {
-      print(recordObj.content);
+      debugPrint(recordObj.content);
 
       for (var i = 0; i < 7; i++) {
-        print(recordObj.date);
-        print(weeklyRecordList[i]['date']);
+        debugPrint(recordObj.date);
+        debugPrint(weeklyRecordList[i]['date']);
         if (recordObj.date == weeklyRecordList[i]['date']) {
-          print(recordObj.content);
+          debugPrint(recordObj.content);
           weeklyRecordList[i]['${recordObj.subject.title}'] += recordObj.time;
         }
       }
@@ -90,16 +68,16 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
       TableRow(
         children: [
           const Text(''),
-          Text(tableDateFormatter.format(weeklyRecordList[0]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[1]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[2]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[3]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[4]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[5]['date'])),
-          Text(tableDateFormatter.format(weeklyRecordList[6]['date'])),
+          ...List.generate(
+            7,
+            (index) => Text(
+              tableDateFormatter.format(weeklyRecordList[index]['date']),
+            ),
+          ),
         ],
       ),
     ];
+
     // まず科目で必要な行を作成
     for (final subjectObj in subjectList) {
       final contents = <Text>[
@@ -145,30 +123,26 @@ class _TableUpdateWidgetState extends State<TableUpdateWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: DefaultTextStyle.merge(
-              style: const TextStyle(fontSize: 22),
-              textAlign: TextAlign.center,
-              child: Table(
-                border: TableBorder.all(),
-                children: weeklyRecordTableRowList,
-              ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(fontSize: 22),
+            textAlign: TextAlign.center,
+            child: Table(
+              border: TableBorder.all(),
+              children: weeklyRecordTableRowList,
             ),
           ),
         ),
-        Container(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: DateTimeFormField(
-              lastDate: DateTime.now(),
-              initialPickerDateTime: DateTime.now(),
-              mode: DateTimeFieldPickerMode.date,
-              onChanged: (value) {
-                tableUpdate(value!);
-              },
-            ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: DateTimeFormField(
+            lastDate: DateTime.now(),
+            initialPickerDateTime: DateTime.now(),
+            mode: DateTimeFieldPickerMode.date,
+            onChanged: (value) {
+              tableUpdate(value!);
+            },
           ),
         ),
       ],
@@ -242,8 +216,9 @@ class SummaryPageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    print(subjectList);
-    print(recordList);
+    logger
+      ..d(subjectList)
+      ..d(recordList);
 
     return Scaffold(
       appBar: AppBar(

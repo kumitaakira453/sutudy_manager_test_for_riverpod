@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
-import 'record_register.dart';
-import 'subject_register.dart';
-import 'summary.dart';
+import 'pages/record_register.dart';
+import 'pages/subject_register.dart';
+import 'pages/summary.dart';
+
+final Logger logger = Logger();
 
 void main() {
   runApp(const MyApp());
