@@ -2,11 +2,11 @@ import '../models/record.dart';
 import '../models/subject.dart';
 
 List<Subject> initialSubjects = [
-  Subject(id: 0, title: '数学'),
-  Subject(id: 1, title: '英語'),
-  Subject(id: 2, title: '理科'),
-  Subject(id: 3, title: '社会'),
-  Subject(id: 4, title: '音楽'),
+  Subject(id: 1, title: '数学'),
+  Subject(id: 2, title: '英語'),
+  Subject(id: 3, title: '理科'),
+  Subject(id: 4, title: '社会'),
+  Subject(id: 5, title: '音楽'),
 ];
 
 // Record テストデータ

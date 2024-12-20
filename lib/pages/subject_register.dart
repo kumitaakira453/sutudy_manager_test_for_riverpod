@@ -19,7 +19,7 @@ class _SubjectRegisterPageState extends ConsumerState<SubjectRegisterPage> {
   @override
   Widget build(BuildContext context) {
     void addSubject(String title) {
-      final id = ref.watch(subjectsNotifierProvider).length;
+      final id = ref.watch(subjectsMaxIdProvider) + 1;
       ref
           .read(subjectsNotifierProvider.notifier)
           .add(Subject(id: id, title: title));

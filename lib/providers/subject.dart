@@ -21,3 +21,16 @@ final subjectsNotifierProvider =
     StateNotifierProvider<SubjectsNotifier, List<Subject>>(
   (ref) => SubjectsNotifier(),
 );
+
+final subjectsMaxIdProvider = Provider<int>((ref) {
+  // providerの変化を検知
+  final subjects = ref.watch(subjectsNotifierProvider);
+  if (subjects.isEmpty) return -1;
+  return subjects.map((e) => e.id).reduce((a, b) => a > b ? a : b);
+});
+
+final subjectsMinIdProvider = Provider<int>((ref) {
+  final subjects = ref.watch(subjectsNotifierProvider);
+  if (subjects.isEmpty) return -1;
+  return subjects.map((e) => e.id).reduce((a, b) => a < b ? a : b);
+});

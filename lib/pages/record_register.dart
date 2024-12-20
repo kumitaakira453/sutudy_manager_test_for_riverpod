@@ -24,7 +24,7 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
   final minutesController = TextEditingController();
 
   Map<String, dynamic> formValue = {};
-  int selectedValue = 0;
+  int? selectedValue;
 
   @override
   void dispose() {
@@ -35,10 +35,12 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final minId = ref.watch(subjectsMinIdProvider);
     final subjectList = ref.watch(subjectsNotifierProvider);
 
     void addRecord(Map<String, dynamic> formValue) {
-      final id = ref.watch(recordsNotifierProvider).length;
+      // lengthで取得すると同じIDのものが全て削除されてしまう
+      final id = ref.watch(recordsMaxIdProvider) + 1;
       ref.read(recordsNotifierProvider.notifier).add(
             Record(
               id: id,
@@ -55,7 +57,7 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
       dropdownMenuItemList.add(
         DropdownMenuItem(
           value: subject.id,
-          child: Text(subject.title),
+          child: Text('${subject.title}(${subject.id})'),
         ),
       );
     }
@@ -73,7 +75,7 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
               padding: const EdgeInsets.all(16),
               child: Center(
                 child: DropdownButton(
-                  value: selectedValue,
+                  value: selectedValue ?? minId,
                   items: dropdownMenuItemList,
                   menuWidth: 140,
                   underline: Container(
@@ -167,7 +169,7 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
           if (formKey.currentState!.validate()) {
             final hours = int.tryParse(hoursController.text) ?? 0;
             final minutes = int.tryParse(minutesController.text) ?? 0;
-            formValue['subject'] = subjectList[selectedValue];
+            formValue['subject'] = subjectList[selectedValue ?? minId];
             formValue['content'] = contentFormKey.currentState?.value ?? '';
             formValue['date'] = dateFormKey.currentState?.value ?? '';
             formValue['time'] = Duration(hours: hours, minutes: minutes);

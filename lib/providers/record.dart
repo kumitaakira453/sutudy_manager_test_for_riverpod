@@ -19,3 +19,10 @@ final recordsNotifierProvider =
     StateNotifierProvider<RecordsNotifier, List<Record>>(
   (ref) => RecordsNotifier(),
 );
+
+final recordsMaxIdProvider = Provider<int>((ref) {
+  // providerの変化を検知
+  final subjects = ref.watch(recordsNotifierProvider);
+  if (subjects.isEmpty) return -1;
+  return subjects.map((e) => e.id).reduce((a, b) => a > b ? a : b);
+});
