@@ -13,6 +13,8 @@ dependencies:
   date_field: ^5.2.1
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod:
   intl:
 
