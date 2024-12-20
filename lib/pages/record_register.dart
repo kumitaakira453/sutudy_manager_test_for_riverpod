@@ -71,15 +71,23 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: DropdownButton(
-                value: selectedValue,
-                items: dropdownMenuItemList,
-                onChanged: (value) {
-                  setState(() {
-                    selectedValue = value!;
-                  });
-                },
-                isExpanded: true,
+              child: Center(
+                child: DropdownButton(
+                  value: selectedValue,
+                  items: dropdownMenuItemList,
+                  menuWidth: 140,
+                  underline: Container(
+                    height: 2,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedValue = value!;
+                    });
+                  },
+                  isExpanded: false,
+                  alignment: Alignment.center,
+                ),
               ),
             ),
             Padding(
@@ -95,6 +103,7 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: DateTimeFormField(
+                initialValue: DateTime.now(),
                 key: dateFormKey,
                 decoration: const InputDecoration(
                   labelText: '学習日',
