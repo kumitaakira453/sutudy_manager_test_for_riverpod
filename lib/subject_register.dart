@@ -8,22 +8,17 @@ class SubjectRegisterPage extends StatefulWidget {
 }
 
 class SubjectRegisterPageState extends State<SubjectRegisterPage> {
-
   final formKey = GlobalKey<FormState>();
   final titleFormKey = GlobalKey<FormFieldState<String>>();
 
   @override
   Widget build(BuildContext context) {
+    final addSubject = ModalRoute.of(context)!.settings.arguments! as Function;
 
-    final addSubject = ModalRoute.of(context)!.settings.arguments!
-      as Function;
-        
     return Scaffold(
-      
       appBar: AppBar(
         title: const Text('SubjectRegisterPage'),
       ),
-
       body: Form(
         key: formKey,
         child: Column(
@@ -50,7 +45,6 @@ class SubjectRegisterPageState extends State<SubjectRegisterPage> {
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.send),
         onPressed: () {
@@ -60,7 +54,6 @@ class SubjectRegisterPageState extends State<SubjectRegisterPage> {
           }
         },
       ),
-
     );
   }
 }

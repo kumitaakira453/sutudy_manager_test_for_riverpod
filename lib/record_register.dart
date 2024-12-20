@@ -1,12 +1,12 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
+
 import 'models/subject.dart';
 
 class RecordRegisterArguments {
+  RecordRegisterArguments(this.addRecord, this.subjectList);
   final void Function(Subject, String, DateTime, Duration) addRecord;
   final List<Subject> subjectList;
-
-  RecordRegisterArguments(this.addRecord, this.subjectList);
 }
 
 class RecordRegisterPage extends StatefulWidget {
@@ -24,7 +24,6 @@ class RecordRegisterPage extends StatefulWidget {
 }
 
 class RecordRegisterPageState extends State<RecordRegisterPage> {
-
   final formKey = GlobalKey<FormState>();
   final contentFormKey = GlobalKey<FormFieldState<String>>();
   final dateFormKey = GlobalKey<FormFieldState<DateTime>>();
@@ -43,40 +42,37 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final addRecord = widget.addRecord;
     final subjectList = widget.subjectList;
 
     // print(addRecord);
     print(subjectList);
 
-    List<DropdownMenuItem<int>> dropdownMenuItemList = [];
-    subjectList.forEach((subjectObj) {
+    final dropdownMenuItemList = <DropdownMenuItem<int>>[];
+    for (final subjectObj in subjectList) {
       dropdownMenuItemList.add(
         DropdownMenuItem(
           value: subjectObj.id,
           child: Text(subjectObj.title),
         ),
       );
-    });
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('RecordRegisterPage'),
       ),
-
       body: Form(
         key: formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: DropdownButton(
                 value: selectedValue,
                 items: dropdownMenuItemList,
-                onChanged: (int? value) {
+                onChanged: (value) {
                   setState(() {
                     selectedValue = value!;
                   });
@@ -84,7 +80,6 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
                 isExpanded: true,
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: TextFormField(
@@ -95,7 +90,6 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: DateTimeFormField(
@@ -106,15 +100,13 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
                 lastDate: DateTime.now(),
                 initialPickerDateTime: DateTime.now(),
                 mode: DateTimeFieldPickerMode.date,
-                onChanged: (DateTime? value) {},
+                onChanged: (value) {},
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-
                   Flexible(
                     child: TextFormField(
                       controller: hoursController,
@@ -131,11 +123,9 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
                       },
                     ),
                   ),
-
                   const Padding(
-                    padding:  EdgeInsets.all(4),
+                    padding: EdgeInsets.all(4),
                   ),
-
                   Flexible(
                     child: TextFormField(
                       controller: minutesController,
@@ -145,34 +135,33 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if (value == null || value.isEmpty || int.parse(value) > 60) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            int.parse(value) > 60) {
                           return 'Please enter minutes';
                         }
                         return null;
                       },
                     ),
                   ),
-                
                 ],
               ),
             ),
-
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.send),
         onPressed: () {
           if (formKey.currentState!.validate()) {
-            final int hours = int.tryParse(hoursController.text) ?? 0;
-            final int minutes = int.tryParse(minutesController.text) ?? 0;
-            final DateTime date = dateFormKey.currentState?.value ?? DateTime(0);
-            final DateTime updatedDateTime = DateTime(date.year, date.month, date.day);
+            final hours = int.tryParse(hoursController.text) ?? 0;
+            final minutes = int.tryParse(minutesController.text) ?? 0;
+            final date = dateFormKey.currentState?.value ?? DateTime(0);
+            final updatedDateTime = DateTime(date.year, date.month, date.day);
 
             addRecord(
-              subjectList[selectedValue], 
-              contentFormKey.currentState?.value ?? '', 
+              subjectList[selectedValue],
+              contentFormKey.currentState?.value ?? '',
               updatedDateTime,
               Duration(hours: hours, minutes: minutes),
             );
@@ -180,8 +169,6 @@ class RecordRegisterPageState extends State<RecordRegisterPage> {
           }
         },
       ),
-
     );
   }
 }
-
