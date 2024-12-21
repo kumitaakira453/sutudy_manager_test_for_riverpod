@@ -40,10 +40,10 @@ class _RecordRegisterPageState extends ConsumerState<RecordRegisterPage> {
 
     void addRecord(Map<String, dynamic> formValue) {
       // lengthで取得すると同じIDのものが全て削除されてしまう
-      final id = ref.watch(recordsMaxIdProvider) + 1;
+      final newId = ref.watch(recordsMaxIdProvider) + 1;
       ref.read(recordsNotifierProvider.notifier).add(
             Record(
-              id: id,
+              id: newId,
               subject: formValue['subject'],
               content: formValue['content'],
               date: formValue['date'],
